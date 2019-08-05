@@ -32,31 +32,36 @@ data("Carseats", package = "ISLR")
 
 ##answer:
 
-> lm.fit <- lm(Sales ~ Advertising + Price, data = Carseats)
-> summary(lm.fit)
+```{r}
+lm.fit <- lm(Sales ~ Advertising + Price, data = Carseats)
+summary(lm.fit)
+plot(lm.fit)
 
-Call:
-lm(formula = Sales ~ Advertising + Price, data = Carseats)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--7.9011 -1.5470 -0.0223  1.5361  6.3748 
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) 13.003427   0.606850  21.428  < 2e-16 ***
-Advertising  0.123107   0.018079   6.809 3.64e-11 ***
-Price       -0.054613   0.005078 -10.755  < 2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 2.399 on 397 degrees of freedom
-Multiple R-squared:  0.2819,	Adjusted R-squared:  0.2782 
-F-statistic: 77.91 on 2 and 397 DF,  p-value: < 2.2e-16
-
+```
+## how Advertising and Price affect the Sales?
+## coefficients: 
+## r^2
+## Residual standard error
 
 
 2.  Fit a second model by adding Urban as an interactive variable with Advertising.  Interpret the two new coefficients produced by adding this interaction to the Advertising variable that was already present from the first question, in a few statements.
+
+## Answer:
+
+```{r}
+
+lm.fit2 <- lm(Sales ~ Advertising + Urban, data = Carseats)
+summary(lm.fit2)
+
+```
+
+## compaire the two new coefficients? 
+```{r}
+simple_fit2 <- lm(Sales ~ Advertising * Urban + Price, data = Carseats)
+summary(simple_fit2)
+plot(simple_fit2)
+```
+
 
 3.  Which of these two models is preferable, and why?  
 
@@ -74,7 +79,27 @@ This question should be answered using the `Weekly` data set, which is part of t
 
 1.   Perform exploratory data analysis of the `Weekly` data (produce some numerical and graphical summaries). Discuss any patterns that emerge. 
 
+
+##answer:
+```{r}
+head(Weekly[,1:8])
+Weekly2 <- Weekly[,1:8]
+View(Weekly2)
+cor(Weekly2)
+install.packages("corrplot")
+library(corrplot)
+corrplot::corrplot.mixed(cor(Weekly2), upper = "circle")
+
+
+```
+
+
 2. Fit a logistic regression with `Direction` as the response and different combinations of lag variables plus `Volume` as predictors. Use the period from 1990 to 2008 as your training set and 2009-2010 as your test set. Produce a summary of results. 
+
+```{r}
+
+```
+
 
     Do any of the predictors appear to be statistically significant in your training set? If so, which ones?
 
@@ -85,4 +110,4 @@ This question should be answered using the `Weekly` data set, which is part of t
 4.  (Extra credit) Experiment with alternative classification methods. 
 
     Present the results of your experiments reporting method, associated confusion matrix, and measures of fit on the test set like accuracy, precision, recall, and F1.
-    
+ 
