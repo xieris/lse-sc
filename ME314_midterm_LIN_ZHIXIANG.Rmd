@@ -38,10 +38,14 @@ summary(lm.fit)
 plot(lm.fit)
 
 ```
-## how Advertising and Price affect the Sales?
-## coefficients: 
-## r^2
-## Residual standard error
+**how Advertising and Price affect the Sales?**
+
+**Intercept is most statistical significant as Pr(>|t|) is so small(2e-16) and t value is 21. It's ***significant.**
+**Adverstisting has positive correlation with Sales, price is negative correlation with sales.Both are significant.**
+**The R square is 0.2819 which is not very high, which means the model has independent variables that are statistically significant but a low R-squared value.This combination indicates that the independent variables are correlated with the dependent variable, but they do not explain much of the variability in the dependent variable.**
+**The residual standard error is 2.399 which is quite low, that means it's a good model. **
+**Price: suggests a relationship between price and sales given the low p-value of the F-statistic. The coefficient states a negative relationship between Price and Sales: as Price increases, Sales decreases.**
+
 
 
 2.  Fit a second model by adding Urban as an interactive variable with Advertising.  Interpret the two new coefficients produced by adding this interaction to the Advertising variable that was already present from the first question, in a few statements.
@@ -49,26 +53,31 @@ plot(lm.fit)
 ## Answer:
 
 ```{r}
+Carseats$Urban <- ifelse(Carseats$Urban=="Yes",1,0)
 
-lm.fit2 <- lm(Sales ~ Advertising + Urban, data = Carseats)
+lm.fit2 <- lm(Sales ~ Advertising + Advertising:Urban + Price, data = Carseats)
 summary(lm.fit2)
+plot(lm.fit2)
 
 ```
 
-## compaire the two new coefficients? 
-```{r}
-simple_fit2 <- lm(Sales ~ Advertising * Urban + Price, data = Carseats)
-summary(simple_fit2)
-plot(simple_fit2)
-```
+## compaire the two new coefficients?
+**Urban coefficients and Advertising are not significant at all, adding Urban as interaction variable caused caused Advertising less significant than the first model. Urban coeffcient;s Pr(>|t|) is almost 1 which means has no significance to dependant variable (sales)**
 
 
 3.  Which of these two models is preferable, and why?  
 
+**Choose the first model. Although the two models are quite similar as R sqaure are almost same. However the adjusted R square is bigger in the first model as it means it's better to avoid overfitting. Also F statistics in the first model is larger thant the second model while p-value are almost the same, therefore, the overall fit of the first model is better than the second model. **
+
+```{r}
+simple_fit2 <- lm(Sales ~ Advertising + Advertising*Urban+Price, data = Carseats)
+summary(simple_fit2)
+```
 
 ## Question 2:
 
 You will need to load the core library for the course textbook and any other libraries you find suitable to answer the question:
+    
 ```{r}
 data("Weekly", package = "ISLR")
 library("MASS")
@@ -79,35 +88,217 @@ This question should be answered using the `Weekly` data set, which is part of t
 
 1.   Perform exploratory data analysis of the `Weekly` data (produce some numerical and graphical summaries). Discuss any patterns that emerge. 
 
-
 ##answer:
 ```{r}
-head(Weekly[,1:8])
-Weekly2 <- Weekly[,1:8]
-View(Weekly2)
-cor(Weekly2)
-install.packages("corrplot")
-library(corrplot)
-corrplot::corrplot.mixed(cor(Weekly2), upper = "circle")
+data("Weekly", package = "ISLR")
+head(Weekly)
+Weekly$Direction <- ifelse(Weekly$Direction== "Up",1,0)
+summary(Weekly)
+pairs(Weekly)
 
+corrplot::corrplot.mixed(cor(Weekly),upper="circle")
 
 ```
+
+**Volume and Year are related. ** 
+**Year and volumn has 0.84 relation, Today and direction has 0.72 corrolation**
+
 
 
 2. Fit a logistic regression with `Direction` as the response and different combinations of lag variables plus `Volume` as predictors. Use the period from 1990 to 2008 as your training set and 2009-2010 as your test set. Produce a summary of results. 
 
 ```{r}
+train <- subset(Weekly,Year= 1990 & Year <= 2008)
+test <- subset(Weekly,Year==2009 | Year==2010)
+lag1_volume_fit <- glm(Direction~Lag1+Volume, data=train, family="binomial")
+probs <- predict(lag1_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag2_volume_fit <- glm(Direction~Lag2+Volume, data=train, family="binomial")
+probs <- predict(lag2_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+
+pred.glm[probs > 0.5] <- 1 
+table(pred.glm,test$Direction)
+
+mean(pred.glm != test$Direction)
+
+lag3_volume_fit <- glm(Direction~Lag3+Volume, data=train, family="binomial")
+probs <- predict(lag3_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag4_volume_fit <- glm(Direction~Lag4+Volume, data=train, family="binomial")
+probs <- predict(lag4_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag5_volume_fit <- glm(Direction~Lag5+Volume, data=train, family="binomial")
+probs <- predict(lag5_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag1_lag2_volume_fit <- glm(Direction~Lag1+Lag2+Volume, data=train, family="binomial")
+probs <- predict(lag1_lag2_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag1_lag2_lag3_volume_fit <- glm(Direction~Lag1+Lag2+Lag3+Volume, data=train, family="binomial")
+probs <- predict(lag1_lag2_lag3_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag2_lag3_volume_fit <- glm(Direction~Lag2+Lag3+Volume, data=train, family="binomial")
+probs <- predict(lag2_lag3_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+##best mean
+
+lag3_lag4_volume_fit <- glm(Direction~Lag3+Lag4+Volume, data=train, family="binomial")
+probs <- predict(lag3_lag4_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag4_lag5_volume_fit <- glm(Direction~Lag4+Lag5+Volume, data=train, family="binomial")
+probs <- predict(lag4_lag5_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag2_lag4_volume_fit <- glm(Direction~Lag2+Lag4+Volume, data=train, family="binomial")
+probs <- predict(lag2_lag4_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
+
+lag2_lag5_volume_fit <- glm(Direction~Lag2+Lag5+Volume, data=train, family="binomial")
+probs <- predict(lag2_lag5_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+mean(pred.glm != test$Direction)
 
 ```
-
-
     Do any of the predictors appear to be statistically significant in your training set? If so, which ones?
+    **lag 2** 
+
 
 3.  From your test set, compute the confusion matrix, and calculate accuracy, precision, recall and F1. 
      
-    Explain what the confusion matrix is telling you about the types of mistakes made by logistic regression, and what can you learn from additional measures of fit like accuracy, precision, recall, and F1.
+**confution matrix**
+
+```{r}
+confusion_matrix <- table(pred.glm,test$Direction)
+
+confusion_matrix[1,1]
+confusion_matrix[1,2]
+confusion_matrix[2,2]
+confusion_matrix[2,1]
+
+```
+
+**precision**
+```{r}
+precision <- confusion_matrix[2,2]/(confusion_matrix[2,2]+confusion_matrix[1,2])
+precision
+
+```
+
+**recall**
+```{r}
+recall <-confusion_matrix[2,2]/(confusion_matrix[2,2]+confusion_matrix[2,1])
+recall
+
+```
+**F1**
+```{r}
+F1 <- 2*precision*recall/(precision+recall)
+F1
+```
+
+**accuracy**
+```{r}
+accuracy <- (confusion_matrix[1,1])+confusion_matrix[2,2]/(sum(confusion_matrix))
+accuracy
+```
+
+```{r}
+lag2_lag3_volume_fit <- glm(Direction~Lag2+Lag3+Volume, data=train, family="binomial")
+probs <- predict(lag2_lag3_volume_fit, test, type="response")
+pred.glm <- rep(0, length(probs))
+pred.glm[probs > 0.5] <- 1
+ table(pred.glm,test$Direction)
+mean(pred.glm != test$Direction)
+```
+**confution matrix: True Possitive, True negative, ....**
+
 
 4.  (Extra credit) Experiment with alternative classification methods. 
 
     Present the results of your experiments reporting method, associated confusion matrix, and measures of fit on the test set like accuracy, precision, recall, and F1.
- 
+
+
+**lda model**
+```{r}
+lda_model <- lda(Direction~Lag2+Lag3+Volume, data=train)
+lda_pred = predict(lda_model, test)
+table(lda_pred$class,test$Direction)
+mean(lda_pred$class!=test$Direction)
+
+```
+**qda model**
+```{r}
+qda_model <- qda(Direction~Lag2+Lag3+Volume, data=train)
+qda_pred = predict(qda_model, test)
+table(qda_pred$class,test$Direction)
+mean(qda_pred$class!=test$Direction)
+```
+
+**knn**
+```{r}
+train$Today <- NULL
+test$Today <- NULL
+knn_pred_y <- knn(train,test,train$Direction,k=1)
+table(knn_pred_y, test$Direction)
+mean(knn_pred_y!=test$Direction)
+
+```
+
+**best solution**
+
+**find optimum k**
+```{r}
+knn_pred_y = NULL
+error_rate = NULL
+for(i in 1:dim(test)[1]){
+set.seed(1234)
+knn_pred_y = knn(train,test,train$Direction,k=i)
+error_rate[i] = mean(test$Direction != knn_pred_y)
+}
+
+```
+
+**find the minimum error rate**
+```{r}
+min_error_rate = min(error_rate)
+print(min_error_rate)
+```
+
+**get k=42 best**
+```{r}
+knn_pred_y <- knn(train,test,train$Direction,k=42)
+table(knn_pred_y, test$Direction)
+mean(knn_pred_y!=test$Direction)
+
+```
+
